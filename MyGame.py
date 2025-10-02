@@ -4,13 +4,23 @@ import random
 
 
 class Ability:
-    def __init__(self, name, cooldown):
+
+    def __init__(self, name, cooldown, damage=0, healing=0, poison = 0):
         self._name = name
         self._cooldown = cooldown
         self._current_cooldown = 0
+        self._damage = damage
+        self._healing = healing
+        self._poison = poison
+
     @abstractclassmethod
     def spell(self):
         pass
+
+
+    def is_ready(self):
+        return self._current_cooldown == 0
+
     def use(self):
         if self.current_cooldown == 0:
             print(f"Использована способность: {self.name}")
@@ -26,10 +36,13 @@ class Ability:
 
 
 class Character:
-    def __init__(self, name, health, damage):
+    def __init__(self, name, health, damage, abilities = {}):
         self._name = name
         self._health = health
         self._damage = damage
+        self._maxHealth = health
+        self._abilities = abilities
+
 
     @property
     def health(self):
@@ -57,6 +70,17 @@ class Character:
         else:
             self._health = 0
 
+    def take_damage(self, damage):
+        self.health = self.health - damage
+        return self.health > 0
+
+    def is_alive(self):
+        return self.health > 0
+
+    def end_turn(self):
+        for ability in self.abilities.values():
+            ability.update()
+
 
 class Warrior(Character):
     def __init__(self, name, health, damage):
@@ -71,6 +95,24 @@ class Assasin(Character):
         super().__init__(name. health, damage)
 
 
+class Game():
+
+    def __init__(self, player):
+        self._player = player
+        self._combat = None
+
+    def start_new_game(self):
+         pass
+        
+
+
+    def fight(self):
+
+        self._player.end_turn()
+
+
+        
+    
 
 def main():
     pass
