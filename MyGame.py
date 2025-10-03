@@ -230,10 +230,7 @@ class AbilityCards:
     def display_ability_hand(ability_objects):
         card_names = []
         for ability in ability_objects:
-            if hasattr(ability, 'name'):
-                card_names.append(ability.name)
-            else:
-                card_names.append(str(ability))
+            card_names.append(ability._name)
         
         AbilityCards.display_hand(card_names)
 
@@ -423,21 +420,28 @@ class Combat:
                 #проверка что мы не нахилим сверх нормы
 
             elif action == 3:
-                for ability in self._player._abilities:
-                    AbilityCards.display_card(ability._name)
-                trak = True
-                while trak:
-                    num_card = input("Choose the card number: ")
-                    if num_card.isdigit and num_card < len(self._player._abilities):
-                        if ability.is_ready():
-                            self._card = num_card - 1
-                            trak = False
-                        else:
-                            print(f"card in cooldown {self._player._abilities[num_card - 1].cooldown} more second")
-                            break
-                    else:
-                        print("Not name, number please")
-                        continue
+                AbilityCards.display_ability_hand(self._player._abilities)
+                for i in range(0, len(self._player._abilities)):
+                    print(f"Current cd: {self._player._abilities[i]._current_cooldown}", end = "      ")
+                if len(self._player._abilities) > 0:
+                    while True:
+                        try:
+                            num_card = int(input("Choose the card number: "))
+                            if num_card <= len(self._player._abilities):
+                                if self._player._abilities[num_card - 1].is_ready():
+                                    self._card = num_card - 1
+                                    break   
+                                else:
+                                    print(f"card in cooldown {self._player._abilities[num_card - 1].cooldown} more second")
+                                    break
+                            else:
+                                print("Пожалуйста, введите корректное число")
+                            
+                        except TypeError:
+                            print("Пожалуйста, введите целое число")
+                    
+                            
+                    
                     
             else:
                 print("not correct")
