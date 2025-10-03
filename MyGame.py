@@ -67,26 +67,26 @@ class Ability:
 
 class Fireball(Ability):
     def __init__(self, name='fireball', cooldown =5, damage = 22, healing=0, poison = 2, poison_dmg = 3, shield = 0, splash = 'close'):
-        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
 
 
 class Heal(Ability):
     def __init__(self, name="heal", cooldown = 5, damage=0, healing=30, poison = 0, poison_dmg = 0, shield = 0, splash = None):
-        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
 
 class Shield(Ability):
     def __init__(self, name="shield", cooldown =4, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 15, splash = None):
-        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
 
 
 class Lightning(Ability):
     def __init__(self, name = "lightning", cooldown = 6, damage=25, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = "full"):
-        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
 
 
 class Poison(Ability):
     def __init__(self, name = "poison", cooldown = 4, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = None):
-        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
 
 class AbilityCards:
     @staticmethod
@@ -96,10 +96,10 @@ class AbilityCards:
                 "┌───────────────┐",
                 "│   FIREBALL    │",
                 "│               │",
-                "│      /\\      │",
+                "│      /\\\      │",
                 "│     (  )      │",
                 "│    (    )     │",
-                "│   /------\\   │",
+                "│   /------\\\   │",
                 "│  |  FIRE  ||  │",
                 "│   \______//   │",
                 "│               │",
@@ -153,52 +153,52 @@ class AbilityCards:
                 "└───────────────┘"
             ],
             'lightning': [
-                "┌─────────────────┐",
-                "│   LIGHTNING     │",
-                "│                 │",
-                "│       /\\       │",
-                "│      /  \\      │",
-                "│     /    \\     │",
-                "│    /  ZZ  \\    │",
-                "│   /________\\   │",
-                "│     /    /      │",
-                "│                 │",
-                "│ Damage: 25      │",
-                "│ Cooldown: 6     │",
-                "└─────────────────┘"
+                "┌────────────────┐",
+                "│   LIGHTNING    │",
+                "│                │",
+                "│      /\\       │",
+                "│     /  \\      │",
+                "│    /    \\     │",
+                "│   /  ZZ  \\    │",
+                "│  /________\\   │",
+                "│    /    /      │",
+                "│                │",
+                "│ Damage: 25     │",
+                "│ Cooldown: 6    │",
+                "└────────────────┘"
             ],
             'poison': [
                 
-                "┌─────────────────┐",
-                "│     POISON      │",
-                "│                 │",
-                "│      . . .      │",
-                "│     .  @  .     │",
-                "│    .   @   .    │",
-                "│     .  @  .     │",
-                "│      '   '      │",
-                "│       ~ ~       │",
-                "│                 │",
-                "│ Damage: 5/3 tur │",
-                "│ Duration: 4     │",
-                "└─────────────────┘"
+                "┌────────────────┐",
+                "│    POISON      │",
+                "│                │",
+                "│     . . .      │",
+                "│    .  @  .     │",
+                "│   .   @   .    │",
+                "│    .  @  .     │",
+                "│     '   '      │",
+                "│      ~ ~       │",
+                "│                │",
+                "│ Damage: 5/3 tur│",
+                "│ Duration: 4    │",
+                "└────────────────┘"
 
 
             ],
             'berserk': [
-                "┌─────────────────┐",
-                "│    BERSERK      │",
-                "│                 │",
-                "│      /\\_/\\    │",
-                "│     ( o.o )     │",
-                "│      > ^ <      │",
-                "│     /  |  \\    │",
-                "│    /   |   \\   │",
-                "│   /_________\\  │",
-                "│                 │",
-                "│ +10 DMG 3 TURNS │",
-                "│ COOLDOWN: 7     │",
-                "└─────────────────┘"
+                "┌────────────────┐",
+                "│   BERSERK      │",
+                "│                │",
+                "│     /\\_/\\    │",
+                "│    ( o.o )     │",
+                "│     > ^ <      │",
+                "│    /  |  \\    │",
+                "│   /   |   \\   │",
+                "│  /_________\\  │",
+                "│                │",
+                "│ +10 DMG 3 T    │",
+                "│ COOLDOWN: 7    │",
+                "└────────────────┘"
             ]
             
         }
@@ -212,6 +212,31 @@ class AbilityCards:
         else:
             print(f"Card '{card_name}' not found")
     
+    @staticmethod   
+    def display_hand(card_names):
+        cards = AbilityCards.get_cards()
+        hand = [cards[name] for name in card_names if name in cards]
+        
+        if not hand:
+            print("No valid cards in hand")
+            return
+        
+        for line_num in range(len(hand[0])):
+            for card in hand:
+                print(card[line_num], end="  ")
+            print()
+
+    @staticmethod
+    def display_ability_hand(ability_objects):
+        card_names = []
+        for ability in ability_objects:
+            if hasattr(ability, 'name'):
+                card_names.append(ability.name)
+            else:
+                card_names.append(str(ability))
+        
+        AbilityCards.display_hand(card_names)
+
     @staticmethod
     def display_hand(card_names):
         cards = AbilityCards.get_cards()
@@ -399,7 +424,7 @@ class Combat:
 
             elif action == 3:
                 for ability in self._player._abilities:
-                    AbilityCards.display_card(ability)
+                    AbilityCards.display_card(ability._name)
                 trak = True
                 while trak:
                     num_card = input("Choose the card number: ")
