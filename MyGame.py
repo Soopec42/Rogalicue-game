@@ -1,8 +1,12 @@
 ﻿from abc import ABC, abstractclassmethod
+from curses.ascii import isdigit
 from enum import Enum
 import random
+from cards import AbilityCards 
+AbilityCards.get_cards
 
 from networkx import is_attracting_component
+from sqlalchemy import false
 
 class GameState(Enum):
     MAIN_MENU = "main_menu"
@@ -49,6 +53,143 @@ class Ability:
         if self.current_cooldown > 0:
             self.current_cooldown -= 1
 
+class AbilityCards:
+    @staticmethod
+    def get_cards():
+        return {
+            'fireball': [
+                "┌───────────────┐",
+                "│   FIREBALL    │",
+                "│               │",
+                "│      /\\      │",
+                "│     (  )      │",
+                "│    (    )     │",
+                "│   /------\\   │",
+                "│  |  FIRE  ||  │",
+                "│   \______//   │",
+                "│               │",
+                "│ Damage: 25    │",
+                "│ Cooldown: 5   │",
+                "└───────────────┘"
+            ],
+            'frost': [
+                "┌───────────────┐",
+                "│    FROST      │",
+                "│               │",
+                "│     * * *     │",
+                "│    *  *  *    │",
+                "│   *   *   *   │",
+                "│    *  *  *    │",
+                "│     * * *     │",
+                "│       *       │",
+                "│               │",
+                "│ Freeze: 1     │",
+                "│ Cooldown: 6   │",
+                "└───────────────┘"
+            ],
+            'heal': [
+                "┌───────────────┐",
+                "│      HEAL     │",
+                "│               │",
+                "│      +++      │",
+                "│     +   +     │",
+                "│    +  H  +    │",
+                "│     +   +     │",
+                "│      +++      │",
+                "│       +       │",
+                "│               │",
+                "│ Heal: 30 HP   │",
+                "│ Cooldown: 5   │",
+                "└───────────────┘"
+            ],
+            'shield': [
+                "┌───────────────┐",
+                "│     SHIELD    │",
+                "│               │",
+                "│    _______    │",
+                "│   /       \\  │",
+                "│  |  SHIELD || │",
+                "│   \       //  │",
+                "│    \     //   │",
+                "│     \___//    │",
+                "│               │",
+                "│ Block: 15 dmg │",
+                "│ Cooldown: 5   │",
+                "└───────────────┘"
+            ],
+            'lightning': [
+                "┌─────────────────┐",
+                "│   LIGHTNING     │",
+                "│                 │",
+                "│       /\\       │",
+                "│      /  \\      │",
+                "│     /    \\     │",
+                "│    /  ZZ  \\    │",
+                "│   /________\\   │",
+                "│     /    /      │",
+                "│                 │",
+                "│ Damage: 20      │",
+                "│ Cooldown: 6     │",
+                "└─────────────────┘"
+            ],
+            'poison': [
+                
+                "┌─────────────────┐",
+                "│     POISON      │",
+                "│                 │",
+                "│      . . .      │",
+                "│     .  @  .     │",
+                "│    .   @   .    │",
+                "│     .  @  .     │",
+                "│      '   '      │",
+                "│       ~ ~       │",
+                "│                 │",
+                "│ Damage: 5/3 tur │",
+                "│ Duration: 4     │",
+                "└─────────────────┘"
+
+
+            ],
+            'berserk': [
+                "┌─────────────────┐",
+                "│    BERSERK      │",
+                "│                 │",
+                "│      /\\_/\\    │",
+                "│     ( o.o )     │",
+                "│      > ^ <      │",
+                "│     /  |  \\    │",
+                "│    /   |   \\   │",
+                "│   /_________\\  │",
+                "│                 │",
+                "│ +10 DMG 3 TURNS │",
+                "│ COOLDOWN: 7     │",
+                "└─────────────────┘"
+            ]
+            
+        }
+    
+    @staticmethod
+    def display_card(card_name):
+        cards = AbilityCards.get_cards()
+        if card_name in cards:
+            for line in cards[card_name]:
+                print(line)
+        else:
+            print(f"Card '{card_name}' not found")
+    
+    @staticmethod
+    def display_hand(card_names):
+        cards = AbilityCards.get_cards()
+        hand = [cards[name] for name in card_names if name in cards]
+        
+        if not hand:
+            print("No valid cards in hand")
+            return
+        
+        for line_num in range(len(hand[0])):
+            for card in hand:
+                print(card[line_num], end="  ")
+            print()
 
 class Character:
     def __init__(self, name, health, damage, abilities = {}):
@@ -163,6 +304,7 @@ class Combat:
         self._player = player
         self._enemies = enemies
         self._turn_count = 0
+        self._target = None
         self.current_turn = "player"
     
     def choose_your_target(enemies):
@@ -185,10 +327,30 @@ class Combat:
             action = input()
             if action == 1:
                 
+                for i in range(0, len(self._enemies)):
+                    print((i + 1) + self._enemies[i].name)
+                
+                trak = True
+                while trak:
+                    target = input("Choose the target: ")
+                    if target.isdigit and target < len(self._enemies):
+                        self._target = target
+                        trak = False
+                    else:
+                        print("Incorrect input")
+                        continue
+
+            elif action == 2:
+                pass
+            elif action == 3:
+                pass
+            else:
+                print("not correct")
+                continue
 
 
 
-            for enemy in self._enemies:
+            
 
 
 
