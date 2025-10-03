@@ -1,12 +1,7 @@
 ﻿from abc import ABC, abstractclassmethod
-from curses.ascii import isdigit
+import string
 from enum import Enum
 import random
-from cards import AbilityCards 
-AbilityCards.get_cards
-
-from networkx import is_attracting_component
-from sqlalchemy import false
 
 class GameState(Enum):
     MAIN_MENU = "main_menu"
@@ -17,24 +12,40 @@ class GameState(Enum):
     GAME_OVER = "game_over"
     VICTORY = "victory"
 
-class EntityType(Enum):
-    PLAYER = "player"
-    ENEMY = "enemy"
-    NPC = "npc"
+
+    
+
+
+class CardFactory:
+    @staticmethod
+    def create_card(card_type):
+        if card_type == "fireball":
+            return Fireball()
+        elif card_type == "heal":
+            return Heal()
+        elif card_type == "shield":
+            return Shield()
+        elif card_type == "lightning":
+            return Lightning()
+        elif card_type == "poison":
+            return Poison()
+
 
 class Ability:
 
-    def __init__(self, name, cooldown, damage=0, healing=0, poison = 0):
+    def __init__(self, name, cooldown, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = None):
         self._name = name
         self._cooldown = cooldown
         self._current_cooldown = 0
         self._damage = damage
         self._healing = healing
         self._poison = poison
+        self._poison_dmg = poison_dmg
 
-    @abstractclassmethod
-    def spell(self):
-        pass
+
+    #@abstractclassmethod
+    #def spell(self):
+    #    pass
 
 
     def is_ready(self):
@@ -52,6 +63,30 @@ class Ability:
     def update(self):
         if self.current_cooldown > 0:
             self.current_cooldown -= 1
+
+
+class Fireball(Ability):
+    def __init__(self, name='fireball', cooldown =5, damage = 22, healing=0, poison = 2, poison_dmg = 3, shield = 0, splash = 'close'):
+        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+
+
+class Heal(Ability):
+    def __init__(self, name="heal", cooldown = 5, damage=0, healing=30, poison = 0, poison_dmg = 0, shield = 0, splash = None):
+        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+
+class Shield(Ability):
+    def __init__(self, name="shield", cooldown =4, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 15, splash = None):
+        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+
+
+class Lightning(Ability):
+    def __init__(self, name = "lightning", cooldown = 6, damage=25, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = "full"):
+        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+
+
+class Poison(Ability):
+    def __init__(self, name = "poison", cooldown = 4, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = None):
+        super().__init__(self, name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
 
 class AbilityCards:
     @staticmethod
@@ -114,7 +149,7 @@ class AbilityCards:
                 "│     \___//    │",
                 "│               │",
                 "│ Block: 15 dmg │",
-                "│ Cooldown: 5   │",
+                "│ Cooldown: 4   │",
                 "└───────────────┘"
             ],
             'lightning': [
@@ -128,7 +163,7 @@ class AbilityCards:
                 "│   /________\\   │",
                 "│     /    /      │",
                 "│                 │",
-                "│ Damage: 20      │",
+                "│ Damage: 25      │",
                 "│ Cooldown: 6     │",
                 "└─────────────────┘"
             ],
@@ -192,7 +227,7 @@ class AbilityCards:
             print()
 
 class Character:
-    def __init__(self, name, health, damage, abilities = {}):
+    def __init__(self, name, health, damage, abilities = []):
         self._name = name
         self._health = health
         self._damage = damage
@@ -242,16 +277,16 @@ class Character:
 
 
 class Warrior(Character):
-    def __init__(self, name, health, damage):
-        super().__init__(name. health, damage)
+    def __init__(self, name, health, damage, abilities = []):
+        super().__init__(name, health, damage, abilities)
     
 class Magician(Character):
-    def __init__(self, name, health, damage):
-        super().__init__(name. health, damage)   
+    def __init__(self, name, health, damage, abilities = []):
+        super().__init__(name, health, damage, abilities)   
 
 class Assasin(Character):
-    def __init__(self, name, health, damage):
-        super().__init__(name. health, damage)
+    def __init__(self, name, health, damage, abilities = []):
+        super().__init__(name, health, damage, abilities)
 
 class Entity():
     def __init__(self, name, health=100, max_health=100, attack=10, defense=5):
@@ -304,8 +339,10 @@ class Combat:
         self._player = player
         self._enemies = enemies
         self._turn_count = 0
-        self._target = None
+        self._target = 0
+        self._card = None
         self.current_turn = "player"
+        self._mass = False
     
     def choose_your_target(enemies):
         target = input("Who is your target? ")
@@ -316,7 +353,7 @@ class Combat:
                 continue
             else:
                 return target
-
+    
     def player_turn(self):
         move = True
         while move:
@@ -324,26 +361,59 @@ class Combat:
             print("1. Choose target")
             print("2. Attack")
             print("3. Use a card")
-            action = input()
+            while True:
+                try:
+                    action = int(input())
+                    break
+                except Exception:
+                    print("Пожалуйста, введите целое число")
+                
             if action == 1:
                 
                 for i in range(0, len(self._enemies)):
-                    print((i + 1) + self._enemies[i].name)
+                    print(f"{(i + 1)} {self._enemies[i]._name}")
                 
-                trak = True
-                while trak:
-                    target = input("Choose the target: ")
-                    if target.isdigit and target < len(self._enemies):
-                        self._target = target
-                        trak = False
-                    else:
-                        print("Incorrect input")
-                        continue
+                while True:
+                    try:
+                        target = int(input("Choose the target: "))
+                        if target <= len(self._enemies):
+                            self._target = target - 1
+                            break
+                        else:
+                            print("Пожалуйста, введите корректный номер карты")
+                            continue
+                    except Exception:
+                        print("Пожалуйста, введите целое число")
+                    
+                    
+                    
 
             elif action == 2:
-                pass
+                if self._card == None:
+                    pass
+                else:
+                    pass
+                #target = 0
+                #сводим все выбраные параметры к базовым
+                #проверка что мы не нахилим сверх нормы
+
             elif action == 3:
-                pass
+                for ability in self._player._abilities:
+                    AbilityCards.display_card(ability)
+                trak = True
+                while trak:
+                    num_card = input("Choose the card number: ")
+                    if num_card.isdigit and num_card < len(self._player._abilities):
+                        if ability.is_ready():
+                            self._card = num_card - 1
+                            trak = False
+                        else:
+                            print(f"card in cooldown {self._player._abilities[num_card - 1].cooldown} more second")
+                            break
+                    else:
+                        print("Not name, number please")
+                        continue
+                    
             else:
                 print("not correct")
                 continue
@@ -353,15 +423,6 @@ class Combat:
             
 
 
-
-        target = self.enemies[target_index] if self.enemies else None
-        success, result = self.player.use_ability(action_key, target)
-
-        self.enemies = [enemy for enemy in self.enemies if enemy.is_alive]
-        
-        self.current_turn = "enemy"
-        return success
-    
     def enemy_turn(self):
         for enemy in self.enemies:
             if enemy.is_alive:
@@ -418,7 +479,16 @@ class Printer():
     
 
 def main():
-    pass
+    
+    fireball1 = CardFactory.create_card('fireball')
+    fireball2 = CardFactory.create_card('fireball')
+    heal1 = Heal()
+    troll = Entity("troll", 50, 50, 10, 0)
+    knight =  Entity("knight", 50, 50, 10, 5)
+    enemies = [troll, knight]
+    player = Warrior("warrior1", 100, 15, abilities = [fireball1, fireball2])
+    fight = Combat(player, enemies)
+    fight.player_turn()
 
 
 
