@@ -1,4 +1,4 @@
-﻿from abc import ABC, abstractclassmethod
+﻿from abc import ABC, abstractmethod
 import string
 from enum import Enum
 import random
@@ -54,17 +54,17 @@ class Ability:
         return self._current_cooldown == 0
 
     def use(self):
-        if self.current_cooldown == 0:
+        if self._current_cooldown == 0:
             print(f"Использована способность: {self.name}")
-            self.current_cooldown = self.cooldown
+            self._current_cooldown = self._cooldown
             return True
         else:
-            print(f"Способность {self.name} перезаряжается. Осталось ходов: {self.current_cooldown}")
+            print(f"Способность {self.name} перезаряжается. Осталось ходов: {self._current_cooldown}")
             return False
     
     def update(self):
-        if self.current_cooldown > 0:
-            self.current_cooldown -= 1
+        if self._current_cooldown > 0:
+            self._current_cooldown -= 1
 
 
 class Fireball(Ability):
@@ -93,40 +93,40 @@ class Poison(Ability):
 class AbilityCards:
     @staticmethod
     def get_cards():
-        return {
+       return {
             'fireball': [
                 "┌───────────────┐",
-                "│   FIREBALL    │",
+                "│  ОГНЕННЫЙ ШАР │",
                 "│               │",
                 "│      /\\\      │",
                 "│     (  )      │",
                 "│    (    )     │",
                 "│   /------\\\   │",
-                "│  |  FIRE  ||  │",
+                "│  |  ОГОНЬ ||  │",
                 "│   \______//   │",
                 "│               │",
-                "│ Add dmg: 5     │",
-                "│ Cooldown: 5   │",
+                "│ Урон: 5       │",
+                "│ Перезаряд: 5  │",
                 "└───────────────┘"
             ],
             'heal': [
                 "┌───────────────┐",
-                "│      HEAL     │",
+                "│    ЛЕЧЕНИЕ    │",
                 "│               │",
                 "│      +++      │",
                 "│     +   +     │",
-                "│    +  H  +    │",
+                "│    +  Л  +    │",
                 "│     +   +     │",
                 "│      +++      │",
                 "│       +       │",
                 "│               │",
-                "│ Heal: 30 HP   │",
-                "│ Cooldown: 5   │",
+                "│ Лечение: 20   │",
+                "│ Перезаряд: 5  │",
                 "└───────────────┘"
             ],
             'shield': [
                 "┌───────────────┐",
-                "│     SHIELD    │",
+                "│      ЩИТ      │",
                 "│               │",
                 "│     /\\_/\\   │",
                 "│    ( o.o )    │",
@@ -135,13 +135,13 @@ class AbilityCards:
                 "│   /   |   \\  │",
                 "│  /_________\\ │",
                 "│               │",
-                "│ Block: 15 dmg │",
-                "│ Cooldown: 4   │",
+                "│ Защита: 15    │",
+                "│ Перезаряд: 4  │",
                 "└───────────────┘"
             ],
             'lightning': [
                 "┌───────────────┐",
-                "│   LIGHTNING   │",
+                "│    МОЛНИЯ     │",
                 "│               │",
                 "│      /\\      │",
                 "│     /  \\     │",
@@ -150,14 +150,13 @@ class AbilityCards:
                 "│  /________\\  │",
                 "│    /    /     │",
                 "│               │",
-                "│ Damage: 25    │",
-                "│ Cooldown: 6   │",
+                "│ Урон: 15(всем)│",
+                "│ Перезаряд: 6  │",
                 "└───────────────┘"
             ],
             'poison': [
-                
                 "┌───────────────┐",
-                "│    POISON     │",
+                "│      ЯД       │",
                 "│               │",
                 "│     . . .     │",
                 "│    .  @  .    │",
@@ -166,11 +165,9 @@ class AbilityCards:
                 "│     '   '     │",
                 "│      ~ ~      │",
                 "│               │",
-                "│ Damage: 5/3   │",
-                "│ Duration: 4   │",
+                "│ Яд: 4/ход     │",
+                "│ Длит: 4 хода  │",
                 "└───────────────┘"
-
-
             ]
             
         }
@@ -220,8 +217,16 @@ class AbilityCards:
                 print(card[line_num], end="  ")
             print()
 
-class Character:
-    def __init__(self, name, health, damage, abilities = [], poisoned = 0, burned = 0, shield = 0):
+class Entiti(ABC):
+    @abstractmethod
+    def take_damage(self, damage):
+        pass
+    
+    @abstractmethod
+    def is_alive(self):
+        pass
+
+    def __init__(self, name, health = 100, damage = 10, abilities = [], poisoned = 0, burned = 0, shield = 0):
         self._name = name
         self._health = health
         self._damage = damage
@@ -231,45 +236,54 @@ class Character:
         self._burned = burned
         self._shield = shield
 
-
-    @property
-    def health(self):
-        return self._health
+        @property
+        def health(self):
+            return self._health
 
    
-    @health.setter
-    def health(self, new_health):
-        if not new_health.isdigit():
-            print("ошибка хп")
-        elif new_health > 0 and new_health <= self._max_health:
-            self._health = new_health
-        elif new_health <= self._max_health:
-            self._health = self._max_health
-        else:
-            self._health = 0
+        @health.setter
+        def health(self, new_health):
+            if new_health > 0 and new_health <= self._maxHealth:
+                self._health = new_health
+            elif new_health > self._maxHealth:
+                self._health = self._maxHealth
+            else:
+                self._health = 0
 
-    @property
-    def damage(self):
-        return self._damage
+        @property
+        def damage(self):
+            return self._damage
 
-    @damage.setter
-    def damage(self, new_damage):
-        if not new_damage.isdigit():
-            print("ошибка damage")
-        elif new_damage > 0:
-            self._health = new_damage
-        else:
-            self._health = 0
+        @damage.setter
+        def damage(self, new_damage):
+            if new_damage > 0:
+                self._health = new_damage
+            else:
+                self._health = 0
 
     def take_damage(self, damage):
-        self.health = self.health - damage
-        
+        actual_damage = damage
+        if self._shield > 0:
+            if self._shield >= actual_damage:
+                self._shield -= actual_damage
+                actual_damage = 0
+            else:
+                actual_damage -= self._shield
+                self._shield = 0
+        self.health = self.health - actual_damage
+
+    def heal(self, amount):
+        self._health = min(self._maxHealth, self._health + amount)
 
     def is_alive(self):
         return self._health > 0
-    
-    def heal(self, amount):
-        self.health = min(self.max_health, self._health + amount)
+
+    @abstractmethod
+    def update():
+        pass
+
+class Character(Entiti):
+   
 
     def update(self):
         if self._poisoned > 0:
@@ -281,7 +295,7 @@ class Character:
 
     def end_turn(self):
         self.update()
-        for ability in self.abilities.values():
+        for ability in self._abilities:
             ability.update()
 
 
@@ -298,49 +312,9 @@ class Assasin(Character):
     def __init__(self, name, health, damage, abilities = []):
         super().__init__(name, health, damage, abilities)
 
-class Entity():
-    def __init__(self, name, health=100, max_health=100, attack=10, defense=5, poisoned = 0, burned = 0, abilities = [], shield = 0):
-        self._name = name
-        self._health = health
-        self._max_health = max_health
-        self._attack_power = attack
-        self._defense = defense
-        self._poisoned = poisoned
-        self._abilities = abilities
-        self._burned = burned
-        self._shield = shield
+class Entity(Entiti):
+    
 
-
-    @property
-    def health(self):
-        return self._health
-
-    @health.setter
-    def health(self, new_health):
-        if not new_health.isdigit():
-            print("ошибка хп")
-        elif new_health > 0 and new_health <= self._max_health:
-            self._health = new_health
-        elif new_health <= self._max_health:
-            self._health = self._max_health
-        else:
-            self._health = 0
-
-    @property
-    def damage(self):
-        return self._damage
-
-    @damage.setter
-    def damage(self, new_damage):
-        if not new_damage.isdigit():
-            print("ошибка damage")
-        elif new_damage > 0:
-            self._health = new_damage
-        else:
-            self._health = 0
-
-    def take_damage(self, damage):
-        self.health = self.health - damage
     
     def update(self):
         if self._poisoned > 0:
@@ -349,12 +323,8 @@ class Entity():
         if self._burned > 0:
             self.take_damage(3)
             self._burned -= 1
-
-    def is_alive(self):
-        return self._health > 0
     
-    def heal(self, amount):
-        self._health = min(self._max_health, self._health + amount)
+    
     
     
 
@@ -375,84 +345,106 @@ class Combat:
                 continue
             else:
                 return target
+
     
     def player_turn(self):
         move = True
         while move:
-            print("Choose your action: ")
-            print("1. Choose target")
-            print("2. Attack")
-            print("3. Use a card")
+            print("\nВыберите действие:")
+            print("   1. Выбрать цель")
+            print("   2. Атаковать")
+            print("   3. Использовать карту")
             while True:
                 try:
-                    action = int(input())
+                    action = int(input("Ваш выбор: "))
                     break
                 except Exception:
-                    print("Пожалуйста, введите целое число")
+                    print("Пожалуйста, введите число")
                 
             if action == 1:
-                
+                print("\nДоступные цели:")
                 for i in range(0, len(self._enemies)):
-                    print(f"{(i + 1)} {self._enemies[i]._name}")
+                    print(f"   {i + 1}. {self._enemies[i]._name} |  {self._enemies[i]._health}/{self._enemies[i]._maxHealth}")
                 
                 while True:
                     try:
-                        target = int(input("Choose the target: "))
+                        target = int(input("Выберите цель: "))
                         if target <= len(self._enemies):
                             self._target = target - 1
+                            print(f"Цель выбрана: {self._enemies[self._target]._name}")
                             break
                         else:
-                            print("Пожалуйста, введите корректный номер карты")
+                            print(f"Введите число от 1 до {len(self._enemies)}")
                             continue
                     except Exception:
-                        print("Пожалуйста, введите целое число")
+                        print("Пожалуйста, введите число")
                     
                     
                     
             # ['fireball', 'heal', 'shield', 'lightning', 'poison']
             elif action == 2:
                 if self._card  != None:
-                    if self._player._abilities[self._card] in ['fireball', 'heal', 'shield', 'poison']:
-                        self._enemies[self._target].take_damage(self.damage + self._player._abilities[self._card]._damage - self._player._abilities[self._card])
+                    ability = self._player._abilities[self._card]
+                    print(f"\nИспользована способность: {ability._name}!")
+                    if ability._damage > 0:
+                        print(f"Нанесено доп урона: {ability._damage}")
+                    if ability._healing > 0:
+                        print(f"Получено лечения: {ability._healing}")
+                    if ability._shield > 0:
+                        print(f"Добавлено щита: {ability._shield}")
+                    if ability._name in ['fireball', 'heal', 'shield', 'poison']:
+                        self._enemies[self._target].take_damage(self._player.damage + ability._damage)
                     else:
                         for i in range(0, len(self._enemies)):
-                            self._enemies[self._target].take_damage(self._player._abilities[self._card]._damage)
-                    self._enemies[self._target]._poisoned += (self._player._abilities[self._card]._poisined)
-                    self._enemies[self._target]._burned += (self._player._abilities[self._card]._burned)
+                            self._enemies[self._target].take_damage(ability._damage)
+                    self._enemies[self._target]._poisoned += (ability._poison)
+                    self._enemies[self._target]._burned += (ability._burne)
                     if self._player._abilities[self._card]._splash == 'close':
                         if len(self._enemies) > self._target + 1:
-                            self._enemies[self._target + 1]._burned += (self._player._abilities[self._card]._burned)
-                            self._enemies[self._target + 1]._posioned += (self._player._abilities[self._card]._poisoned)
+                            self._enemies[self._target + 1]._burned += (ability._burne)
+                            self._enemies[self._target + 1]._poisoned += (ability._poison)
                         if (self._target - 1) != -1:
-                            self._enemies[self._target - 1]._burned += (self._player._abilities[self._card]._burned)
-                            self._enemies[self._target - 1]._posioned += (self._player._abilities[self._card]._poisoned)
-                    self._player.heal(self._player._abilities[self._card]._healing)
-                    self._card = None
-                    self._target = 0
-                    self._player.end_turn()
-
+                            self._enemies[self._target - 1]._burned += (ability._burne)
+                            self._enemies[self._target - 1]._poisoned += (ability._poison)
+                    self._player._shield += ability._shield
+                    self._player.heal(ability._healing)
+                    ability._current_cooldown = ability._cooldown
+                else:
+                    self._enemies[self._target].take_damage(self._player.damage)
+                self._card = None
+                self._player.end_turn()
+                for id in range(len(self._enemies) - 1, -1, -1):
+                    if self._enemies[id].health <= 0:
+                        print(f"{self._enemies[id]._name} defeated!")
+                        self._enemies.pop(id)
+                        self._target = 0
+                break
                 
 
             elif action == 3:
+                print("\nВАШИ КАРТЫ:")
                 AbilityCards.display_ability_hand(self._player._abilities)
+                print("\nПерезарядка:")
                 for i in range(0, len(self._player._abilities)):
-                    print(f"Current cd: {self._player._abilities[i]._current_cooldown}", end = "      ")
+                    cd_status = "Готово" if self._player._abilities[i]._current_cooldown == 0 else f" {self._player._abilities[i]._current_cooldown} ход(ов)"
+                    print(f"   {i+1}. {cd_status}")
                 if len(self._player._abilities) > 0:
                     while True:
                         try:
-                            num_card = int(input("Choose the card number: "))
+                            num_card = int(input("Выберите номер карты: "))
                             if num_card <= len(self._player._abilities):
                                 if self._player._abilities[num_card - 1].is_ready():
                                     self._card = num_card - 1
+                                    print(f"Карта '{self._player._abilities[self._card]._name}' выбрана!")
                                     break   
                                 else:
-                                    print(f"card in cooldown {self._player._abilities[num_card - 1].cooldown} more second")
+                                    print(f"Карта на перезарядке! Осталось: {self._player._abilities[num_card - 1]._current_cooldown} ход(ов)")
                                     break
                             else:
-                                print("Пожалуйста, введите корректное число")
+                                print(f"Введите число от 1 до {len(self._player._abilities)}")
                             
-                        except TypeError:
-                            print("Пожалуйста, введите целое число")
+                        except Exception:
+                            print("Пожалуйста, введите число")
                     
                             
                     
@@ -463,44 +455,60 @@ class Combat:
 
 
 
-            
+    def show_state(self):
+        print(f"Player: {self._player._name} | HP: {self._player.health}/{self._player._maxHealth} | Shield: {getattr(self._player, '_shield', 0)}")
+        print("Enemies:")
+        for i, enemy in enumerate(self._enemies):
+            status_effects = []
+            if getattr(enemy, '_poisoned', 0) > 0:
+                status_effects.append(f"Poisoned({enemy._poisoned})")
+            if getattr(enemy, '_burned', 0) > 0:
+                status_effects.append(f"Burned({enemy._burned})")
+            if getattr(enemy, '_shield', 0) > 0:
+                status_effects.append(f"Shield({enemy._shield})")
+        
+            status_str = " | " + ", ".join(status_effects) if status_effects else ""
+            print(f"  {i+1}. {enemy._name} | HP: {enemy.health}/{enemy._maxHealth}{status_str}")
 
 
     def enemy_turn(self):
-        for enemy in self.enemies:
-            if enemy.is_alive:
-                result = enemy.take_turn(self.player)
+        for enemy in self._enemies:
+            self._player.take_damage(enemy.damage)
+            enemy.update()
         
         
         
-        self.player.end_turn()
     
     def is_combat_over(self):
-        return not self.player.is_alive() or len(self.enemies) == 0
+        player_alive = self._player.is_alive()
+        enemies_alive = len(self._enemies) > 0
+    
+        if not player_alive:
+            return True
+        elif not enemies_alive:
+            return True
+        return False
     
     def get_combat_result(self):
-        if not self.player.is_alive:
-            return "defeat"
-        elif len(self.enemies) == 0:
-            return "victory"
-        return "ongoing"
+        if not self._player.is_alive():
+            print("\nПОРАЖЕНИЕ! Ваш персонаж пал в бою...")
+        elif len(self._enemies) == 0:
+            print("\nПОБЕДА! Все противники повержены!")
 
 class Game():
 
-    def __init__(self):
-        self.state = GameState.MAIN_MENU
-        self.player = None
-        self.enemies = []
 
-    def start_fight(self, player, enemies):
-        fight = Combat(player, enemies)
-        going = True
-        while going:
+    def start_fight(self, fight):
+        while not fight.is_combat_over():
             fight.player_turn()
-            fight.enemies_turn()
-            if fight.is_attracting_component():
+            if fight.is_combat_over():
                 fight.get_combat_result()
                 break
+            fight.enemy_turn()
+            if fight.is_combat_over():
+                fight.get_combat_result()
+                break
+            fight.show_state()
            
        
     
@@ -512,27 +520,20 @@ class Game():
 
 
 
-
-    
-    
-
-class Printer():
-    pass
-        
     
 
 def main():
     
     fireball1 = CardFactory.create_card('fireball')
     fireball2 = CardFactory.create_card('fireball')
-    heal1 = Heal()
-    troll = Entity("troll", 50, 50, 10, 0)
-    knight =  Entity("knight", 50, 50, 10, 5)
+    heal1 = CardFactory.create_card('heal')
+    troll = Entity("troll", 50, 10)
+    knight =  Entity("knight", 50, 10)
     enemies = [troll, knight]
-    player = Warrior("warrior1", 100, 15, abilities = [fireball1, fireball2])
+    player = Warrior("warrior1", 100, 15, abilities = [fireball1, fireball2, heal1])
     fight = Combat(player, enemies)
-    fight.player_turn()
-
+    st = Game()
+    st.start_fight(fight)
 
 
 if __name__ == "__main__":
