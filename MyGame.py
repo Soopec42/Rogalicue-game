@@ -33,17 +33,19 @@ class CardFactory:
 
 class Ability:
 
-    def __init__(self, name, cooldown, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = None):
+    def __init__(self, name, cooldown, damage=0, healing=0, poison = 0, burne = 0, shield = 0, splash = None):
         self._name = name
         self._cooldown = cooldown
         self._current_cooldown = 0
         self._damage = damage
         self._healing = healing
         self._poison = poison
-        self._poison_dmg = poison_dmg
+        self._burne = burne
+        self._shield = shield
+        self._splash = splash
 
 
-    #@abstractclassmethod
+    #@abstractmethod
     #def spell(self):
     #    pass
 
@@ -66,27 +68,27 @@ class Ability:
 
 
 class Fireball(Ability):
-    def __init__(self, name='fireball', cooldown =5, damage = 22, healing=0, poison = 2, poison_dmg = 3, shield = 0, splash = 'close'):
-        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+    def __init__(self, name='fireball', cooldown =5, damage = 5, healing=0, poison = 0, burne = 2, shield = 0, splash = 'close'):
+        super().__init__(name, cooldown, damage, healing, poison, burne, shield, splash)
 
 
 class Heal(Ability):
-    def __init__(self, name="heal", cooldown = 5, damage=0, healing=30, poison = 0, poison_dmg = 0, shield = 0, splash = None):
-        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+    def __init__(self, name="heal", cooldown = 5, damage=0, healing=20, poison = 0, burne = 0, shield = 0, splash = None):
+        super().__init__(name, cooldown, damage, healing, poison, burne, shield, splash)
 
 class Shield(Ability):
-    def __init__(self, name="shield", cooldown =4, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 15, splash = None):
-        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+    def __init__(self, name="shield", cooldown =4, damage=0, healing=0, poison = 0, burne = 0, shield = 15, splash = None):
+        super().__init__(name, cooldown, damage, healing, poison, burne, shield, splash)
 
 
 class Lightning(Ability):
-    def __init__(self, name = "lightning", cooldown = 6, damage=25, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = "full"):
-        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+    def __init__(self, name = "lightning", cooldown = 6, damage=15, healing=0, poison = 0, burne = 0, shield = 0, splash = None):
+        super().__init__(name, cooldown, damage, healing, poison, burne, shield, splash)
 
 
 class Poison(Ability):
-    def __init__(self, name = "poison", cooldown = 4, damage=0, healing=0, poison = 0, poison_dmg = 0, shield = 0, splash = None):
-        super().__init__(name, cooldown, damage, healing, poison, poison_dmg, shield, splash)
+    def __init__(self, name = "poison", cooldown = 4, damage=0, healing=0, poison = 4,  burne = 0, shield = 0, splash = None):
+        super().__init__(name, cooldown, damage, healing, poison, burne, shield, splash)
 
 class AbilityCards:
     @staticmethod
@@ -103,23 +105,8 @@ class AbilityCards:
                 "│  |  FIRE  ||  │",
                 "│   \______//   │",
                 "│               │",
-                "│ Damage: 25    │",
+                "│ Add dmg: 5     │",
                 "│ Cooldown: 5   │",
-                "└───────────────┘"
-            ],
-            'frost': [
-                "┌───────────────┐",
-                "│    FROST      │",
-                "│               │",
-                "│     * * *     │",
-                "│    *  *  *    │",
-                "│   *   *   *   │",
-                "│    *  *  *    │",
-                "│     * * *     │",
-                "│       *       │",
-                "│               │",
-                "│ Freeze: 1     │",
-                "│ Cooldown: 6   │",
                 "└───────────────┘"
             ],
             'heal': [
@@ -141,64 +128,49 @@ class AbilityCards:
                 "┌───────────────┐",
                 "│     SHIELD    │",
                 "│               │",
-                "│    _______    │",
-                "│   /       \\  │",
-                "│  |  SHIELD || │",
-                "│   \       //  │",
-                "│    \     //   │",
-                "│     \___//    │",
+                "│     /\\_/\\   │",
+                "│    ( o.o )    │",
+                "│     > ^ <     │",
+                "│    /  |  \\   │",
+                "│   /   |   \\  │",
+                "│  /_________\\ │",
                 "│               │",
                 "│ Block: 15 dmg │",
                 "│ Cooldown: 4   │",
                 "└───────────────┘"
             ],
             'lightning': [
-                "┌────────────────┐",
-                "│   LIGHTNING    │",
-                "│                │",
-                "│      /\\       │",
-                "│     /  \\      │",
-                "│    /    \\     │",
-                "│   /  ZZ  \\    │",
-                "│  /________\\   │",
-                "│    /    /      │",
-                "│                │",
-                "│ Damage: 25     │",
-                "│ Cooldown: 6    │",
-                "└────────────────┘"
+                "┌───────────────┐",
+                "│   LIGHTNING   │",
+                "│               │",
+                "│      /\\      │",
+                "│     /  \\     │",
+                "│    /    \\    │",
+                "│   /  ZZ  \\   │",
+                "│  /________\\  │",
+                "│    /    /     │",
+                "│               │",
+                "│ Damage: 25    │",
+                "│ Cooldown: 6   │",
+                "└───────────────┘"
             ],
             'poison': [
                 
-                "┌────────────────┐",
-                "│    POISON      │",
-                "│                │",
-                "│     . . .      │",
-                "│    .  @  .     │",
-                "│   .   @   .    │",
-                "│    .  @  .     │",
-                "│     '   '      │",
-                "│      ~ ~       │",
-                "│                │",
-                "│ Damage: 5/3 tur│",
-                "│ Duration: 4    │",
-                "└────────────────┘"
+                "┌───────────────┐",
+                "│    POISON     │",
+                "│               │",
+                "│     . . .     │",
+                "│    .  @  .    │",
+                "│   .   @   .   │",
+                "│    .  @  .    │",
+                "│     '   '     │",
+                "│      ~ ~      │",
+                "│               │",
+                "│ Damage: 5/3   │",
+                "│ Duration: 4   │",
+                "└───────────────┘"
 
 
-            ],
-            'berserk': [
-                "┌────────────────┐",
-                "│   BERSERK      │",
-                "│                │",
-                "│     /\\_/\\    │",
-                "│    ( o.o )     │",
-                "│     > ^ <      │",
-                "│    /  |  \\    │",
-                "│   /   |   \\   │",
-                "│  /_________\\  │",
-                "│                │",
-                "│ +10 DMG 3 T    │",
-                "│ COOLDOWN: 7    │",
-                "└────────────────┘"
             ]
             
         }
@@ -249,43 +221,48 @@ class AbilityCards:
             print()
 
 class Character:
-    def __init__(self, name, health, damage, abilities = []):
+    def __init__(self, name, health, damage, abilities = [], poisoned = 0, burned = 0):
         self._name = name
         self._health = health
         self._damage = damage
         self._maxHealth = health
         self._abilities = abilities
+        self._poisoned = poisoned
+        self._burned = burned
 
 
     @property
     def health(self):
         return self._health
 
+   
     @health.setter
-    def health(self, new_heath):
-        if not new_heath.isdight():
+    def health(self, new_health):
+        if not new_health.isdigit():
             print("ошибка хп")
-        elif new_heath > 0:
-            self._health = new_heath
+        elif new_health > 0 and new_health <= self._max_health:
+            self._health = new_health
+        elif new_health <= self._max_health:
+            self._health = self._max_health
         else:
             self._health = 0
 
     @property
     def damage(self):
-        return self._health
+        return self._damage
 
-    @health.setter
-    def damage(self, new_heath):
-        if not new_heath.isdight():
+    @damage.setter
+    def damage(self, new_damage):
+        if not new_damage.isdigit():
             print("ошибка damage")
-        elif new_heath > 0:
-            self._health = new_heath
+        elif new_damage > 0:
+            self._health = new_damage
         else:
             self._health = 0
 
     def take_damage(self, damage):
-        self._health = self._health - damage
-        return self.health > 0
+        self.health = self.health - damage
+        
 
     def is_alive(self):
         return self._health > 0
@@ -293,9 +270,18 @@ class Character:
     def heal(self, amount):
         self.health = min(self.max_health, self._health + amount)
 
+    def update(self):
+        if self._poisoned > 0:
+            self.take_damage(4)
+            self._poisoned -= 1
+        if self._burned > 0:
+            self.take_damage(3)
+            self._burned -= 1
+
     def end_turn(self):
         for ability in self.abilities.values():
             ability.update()
+
 
 
 class Warrior(Character):
@@ -311,42 +297,55 @@ class Assasin(Character):
         super().__init__(name, health, damage, abilities)
 
 class Entity():
-    def __init__(self, name, health=100, max_health=100, attack=10, defense=5):
+    def __init__(self, name, health=100, max_health=100, attack=10, defense=5, poisoned = 0, burned = 0, abilities = []):
         self._name = name
         self._health = health
         self._max_health = max_health
         self._attack_power = attack
         self._defense = defense
-    
+        self._poisoned = poisoned
+        self._abilities = abilities
+        self._burned = burned
+
+
     @property
     def health(self):
         return self._health
 
     @health.setter
-    def health(self, new_heath):
-        if not new_heath.isdight():
+    def health(self, new_health):
+        if not new_health.isdigit():
             print("ошибка хп")
-        elif new_heath > 0:
-            self._health = new_heath
+        elif new_health > 0 and new_health <= self._max_health:
+            self._health = new_health
+        elif new_health <= self._max_health:
+            self._health = self._max_health
         else:
             self._health = 0
 
     @property
     def damage(self):
-        return self._health
+        return self._damage
 
-    @health.setter
-    def damage(self, new_heath):
-        if not new_heath.isdight():
+    @damage.setter
+    def damage(self, new_damage):
+        if not new_damage.isdigit():
             print("ошибка damage")
-        elif new_heath > 0:
-            self._health = new_heath
+        elif new_damage > 0:
+            self._health = new_damage
         else:
             self._health = 0
 
     def take_damage(self, damage):
-        self._health = self._health - damage
-        
+        self.health = self.health - damage
+    
+    def update(self):
+        if self._poisoned > 0:
+            self.take_damage(4)
+            self._poisoned -= 1
+        if self._burned > 0:
+            self.take_damage(3)
+            self._burned -= 1
 
     def is_alive(self):
         return self._health > 0
@@ -409,15 +408,25 @@ class Combat:
                     
                     
                     
-
+            # ['fireball', 'heal', 'shield', 'lightning', 'poison']
             elif action == 2:
-                if self._card == None:
-                    pass
-                else:
-                    pass
-                #target = 0
-                #сводим все выбраные параметры к базовым
-                #проверка что мы не нахилим сверх нормы
+                if self._card  != None:
+                    if self._player._abilities[self._card] in ['fireball', 'heal', 'shield', 'poison']:
+                        self._enemies[self._target].take_damage(self.damage + self._player._abilities[self._card]._damage)
+                    else:
+                        for i in range(0, len(self._enemies)):
+                            self._enemies[self._target].take_damage(self._player._abilities[self._card]._damage)
+                    if self._player._abilities[self._card]._splash == 'close':
+                        if len(self._enemies) > self._target + 1:
+                            self._enemies[self._target + 1]._burned += (self._player._abilities[self._card]._burned)
+                        self._enemies[self._target]._burned += (self._player._abilities[self._card]._burned)
+                        if (self._target - 1) != -1:
+                            self._enemies[self._target - 1]._burned += (self._player._abilities[self._card]._burned)
+                    elif self._player._abilities[self._card]._splash == 'full':
+                        for i in range(0, len(self._enemies)):
+                            self._enemies[self._target + 1]._burned += (self._player._abilities[self._card]._burned)
+
+                
 
             elif action == 3:
                 AbilityCards.display_ability_hand(self._player._abilities)
@@ -457,12 +466,12 @@ class Combat:
             if enemy.is_alive:
                 result = enemy.take_turn(self.player)
         
-        self.current_turn = "player"
-        self.turn_count += 1
+        
+        
         self.player.end_turn()
     
     def is_combat_over(self):
-        return not self.player.is_alive or len(self.enemies) == 0
+        return not self.player.is_alive() or len(self.enemies) == 0
     
     def get_combat_result(self):
         if not self.player.is_alive:
