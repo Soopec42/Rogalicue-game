@@ -221,7 +221,7 @@ class AbilityCards:
             print()
 
 class Character:
-    def __init__(self, name, health, damage, abilities = [], poisoned = 0, burned = 0):
+    def __init__(self, name, health, damage, abilities = [], poisoned = 0, burned = 0, shield = 0):
         self._name = name
         self._health = health
         self._damage = damage
@@ -229,6 +229,7 @@ class Character:
         self._abilities = abilities
         self._poisoned = poisoned
         self._burned = burned
+        self._shield = shield
 
 
     @property
@@ -279,6 +280,7 @@ class Character:
             self._burned -= 1
 
     def end_turn(self):
+        self.update()
         for ability in self.abilities.values():
             ability.update()
 
@@ -297,7 +299,7 @@ class Assasin(Character):
         super().__init__(name, health, damage, abilities)
 
 class Entity():
-    def __init__(self, name, health=100, max_health=100, attack=10, defense=5, poisoned = 0, burned = 0, abilities = []):
+    def __init__(self, name, health=100, max_health=100, attack=10, defense=5, poisoned = 0, burned = 0, abilities = [], shield = 0):
         self._name = name
         self._health = health
         self._max_health = max_health
@@ -306,6 +308,7 @@ class Entity():
         self._poisoned = poisoned
         self._abilities = abilities
         self._burned = burned
+        self._shield = shield
 
 
     @property
@@ -362,8 +365,6 @@ class Combat:
         self._turn_count = 0
         self._target = 0
         self._card = None
-        self.current_turn = "player"
-        self._mass = False
     
     def choose_your_target(enemies):
         target = input("Who is your target? ")
@@ -412,19 +413,23 @@ class Combat:
             elif action == 2:
                 if self._card  != None:
                     if self._player._abilities[self._card] in ['fireball', 'heal', 'shield', 'poison']:
-                        self._enemies[self._target].take_damage(self.damage + self._player._abilities[self._card]._damage)
+                        self._enemies[self._target].take_damage(self.damage + self._player._abilities[self._card]._damage - self._player._abilities[self._card])
                     else:
                         for i in range(0, len(self._enemies)):
                             self._enemies[self._target].take_damage(self._player._abilities[self._card]._damage)
+                    self._enemies[self._target]._poisoned += (self._player._abilities[self._card]._poisined)
+                    self._enemies[self._target]._burned += (self._player._abilities[self._card]._burned)
                     if self._player._abilities[self._card]._splash == 'close':
                         if len(self._enemies) > self._target + 1:
                             self._enemies[self._target + 1]._burned += (self._player._abilities[self._card]._burned)
-                        self._enemies[self._target]._burned += (self._player._abilities[self._card]._burned)
+                            self._enemies[self._target + 1]._posioned += (self._player._abilities[self._card]._poisoned)
                         if (self._target - 1) != -1:
                             self._enemies[self._target - 1]._burned += (self._player._abilities[self._card]._burned)
-                    elif self._player._abilities[self._card]._splash == 'full':
-                        for i in range(0, len(self._enemies)):
-                            self._enemies[self._target + 1]._burned += (self._player._abilities[self._card]._burned)
+                            self._enemies[self._target - 1]._posioned += (self._player._abilities[self._card]._poisoned)
+                    self._player.heal(self._player._abilities[self._card]._healing)
+                    self._card = None
+                    self._target = 0
+                    self._player.end_turn()
 
                 
 
