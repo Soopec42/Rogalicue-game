@@ -135,6 +135,10 @@ class Poison(Ability):
 
 class AbilityCards:
     @staticmethod
+    def get_masc():
+        return ['fireball', 'heal', 'shield', 'lightning', 'poison']
+
+    @staticmethod
     def get_cards():
        return {
             'fireball': [
@@ -171,12 +175,12 @@ class AbilityCards:
                 "┌───────────────┐",
                 "│      ЩИТ      │",
                 "│               │",
-                "│     /\\_/\\   │",
+                "│     /\\_/\\     │",
                 "│    ( o.o )    │",
                 "│     > ^ <     │",
-                "│    /  |  \\   │",
-                "│   /   |   \\  │",
-                "│  /_________\\ │",
+                "│    /  |  \\    │",
+                "│   /   |   \\   │",
+                "│  /_________\\  │",
                 "│               │",
                 "│ Защита: 15    │",
                 "│ Перезаряд: 4  │",
@@ -186,11 +190,11 @@ class AbilityCards:
                 "┌───────────────┐",
                 "│    МОЛНИЯ     │",
                 "│               │",
-                "│      /\\      │",
-                "│     /  \\     │",
-                "│    /    \\    │",
-                "│   /  ZZ  \\   │",
-                "│  /________\\  │",
+                "│      /\\       │",
+                "│     /  \\      │",
+                "│    /    \\     │",
+                "│   /  ZZ  \\    │",
+                "│  /________\\   │",
                 "│    /    /     │",
                 "│               │",
                 "│ Урон: 15(всем)│",
@@ -390,8 +394,8 @@ class Character(Alive):
 
 
 class Warrior(Character):
-    def __init__(self, name, health, damage, abilities = [], maxcard = 2):
-        super().__init__(name, health, damage, abilities)
+    def __init__(self, name, health, damage, abilities = [], maxcards = 2):
+        super().__init__(name, health, damage, abilities, maxcard = maxcards)
 
     def passive(self, card):
         if card == None:
@@ -403,8 +407,8 @@ class Warrior(Character):
         pass
     
 class Magician(Character):
-    def __init__(self, name, health, damage, abilities = [], maxcard = 3):
-        super().__init__(name, health, damage, abilities)   
+    def __init__(self, name, health, damage, abilities = [], maxcards = 3):
+        super().__init__(name, health, damage, abilities, maxcard = maxcards)   
         
     def passive(self, card):
         pass
@@ -414,8 +418,8 @@ class Magician(Character):
         
 
 class Assasin(Character):
-    def __init__(self, name, health, damage, abilities = [], maxcard = 2):
-        super().__init__(name, health, damage, abilities)
+    def __init__(self, name, health, damage, abilities = [], maxcards = 2):
+        super().__init__(name, health, damage, abilities, maxcard = maxcards)
         for ability in self._abilities:
             ability.cooldown = ability.cooldown - 1
         
@@ -619,7 +623,32 @@ class Game():
         self.kolkl = 3
         self._player = None
         self._choise = None
-        
+        self._choosed_card = None
+
+    def rand_choose_card(self):
+        for i in range(0, self._player._maxcard):
+            firstc = random.choice(AbilityCards.get_masc())
+            secondc = random.choice(AbilityCards.get_masc())
+            threec = random.choice(AbilityCards.get_masc())
+            a = [firstc, secondc, threec]
+            AbilityCards.display_hand(a)
+            while True:
+                try:
+                    choose = int(input("Введите номер: "))
+                    if choose <= 3:
+                        self._choosed_card = choose - 1
+                        break
+                    else:
+                        print(f"Введите число от 1 до 3")
+                        continue
+                except ValueError:
+                    print("Пожалуйста, введите число")
+            if self._choosed_card == 0:
+                self._player._abilities.append(CardFactory.create_card(firstc))
+            if self._choosed_card == 1:
+                self._player._abilities.append(CardFactory.create_card(secondc))
+            if self._choosed_card == 2:
+                self._player._abilities.append(CardFactory.create_card(threec))
 
     def choosing_character(self):
         print("Выберите класс вашего персонажа: ")
@@ -672,6 +701,7 @@ class Game():
 def main():
     st = Game()
     st.choosing_character()
+    st.rand_choose_card()
     troll = Entity("troll", 50, 10)
     knight =  Entity("knight", 50, 10)
     enemies = [troll, knight]
