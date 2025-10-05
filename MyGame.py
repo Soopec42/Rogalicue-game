@@ -2,6 +2,8 @@
 import string
 from enum import Enum
 import random
+import os
+import time
 
 class GameState(Enum):
     MAIN_MENU = "main_menu"
@@ -406,12 +408,17 @@ class Combat:
     def player_turn(self):
         move = True
         while move:
-            print("\nВыберите действие:")
-            print(" 1. Выбрать цель")
+            os.system('cls')
+            self.show_state()
+            print("Выберите действие:")
+            print(" 1. Выбрать цель", end = "")
+            print(f", сейчас цель {self._enemies[self._target].name} |  {self._enemies[self._target].health}/{self._enemies[self._target].maxHealth}")
             print(" 2. Атаковать")
-            print(" 3. Использовать карту")
+            print(" 3. Выберите карту", end = "")
+            if self._card != None:
+                print(f", cейчас выбрана карта {self._player._abilities[self._card].name}")
             try:
-                action = int(input("Ваш выбор: "))
+                action = int(input("\nВаш выбор: "))
             except Exception:
                 print("Пожалуйста, введите число")
                 continue
@@ -450,12 +457,12 @@ class Combat:
         if self._card  != None:
             ability = self._player._abilities[self._card]
             print(f"\nИспользована способность: {ability.name}!")
-            if ability.damage > 0:
-                print(f"Нанесено доп урона: {ability.damage}")
+            print(f"Нанесено урона: {ability.damage + self._player.damage}")
             if ability.healing > 0:
                 print(f"Получено лечения: {ability.healing}")
             if ability.shield > 0:
                 print(f"Добавлено щита: {ability.shield}")
+            time.sleep(3)
             if ability.name in ['fireball', 'heal', 'shield', 'poison']:
                 self._enemies[self._target].take_damage(self._player.damage + ability.damage)
             else:
@@ -527,6 +534,7 @@ class Combat:
         
             status_str = " | " + ", ".join(status_effects) if status_effects else ""
             print(f"  {i+1}. {enemy.name} | HP: {enemy.health}/{enemy.maxHealth}{status_str}")
+        print()
 
 
     def enemy_turn(self):
@@ -566,7 +574,6 @@ class Game():
             if fight.is_combat_over():
                 fight.get_combat_result()
                 break
-            fight.show_state()
             
            
        
