@@ -44,7 +44,41 @@ class Ability:
         self._shield = shield
         self._splash = splash
 
+    @property
+    def name(self):
+        return self._name
 
+    @property
+    def cooldown(self):
+        return self._cooldown
+
+    @property
+    def current_cooldown(self):
+        return self._current_cooldown
+
+    @property
+    def damage(self):
+        return self._damage
+
+    @property
+    def healing(self):
+        return self._healing
+
+    @property
+    def poison(self):
+        return self._poison
+
+    @property
+    def burne(self):
+        return self._burne
+
+    @property
+    def shield(self):
+        return self._shield
+
+    @property
+    def splash(self):
+        return self._splash
     #@abstractmethod
     #def spell(self):
     #    pass
@@ -217,14 +251,7 @@ class AbilityCards:
                 print(card[line_num], end="  ")
             print()
 
-class Entiti(ABC):
-    @abstractmethod
-    def take_damage(self, damage):
-        pass
-    
-    @abstractmethod
-    def is_alive(self):
-        pass
+class Alive(ABC):
 
     def __init__(self, name, health = 100, damage = 10, abilities = [], poisoned = 0, burned = 0, shield = 0):
         self._name = name
@@ -236,31 +263,63 @@ class Entiti(ABC):
         self._burned = burned
         self._shield = shield
 
-        @property
-        def health(self):
-            return self._health
+    @property
+    def name(self):
+        return self._name
 
+    @property
+    def health(self):
+        return self._health
+
+    @property
+    def maxHealth(self):
+        return self._maxHealth
+
+    @property
+    def shield(self):
+        return self._shield
+
+    @shield.setter
+    def shield(self, value):
+            
+        self._shield = max(0, value)
+
+    @property
+    def poisoned(self):
+        return self._poisoned
+
+    @poisoned.setter
+    def poisoned(self, value):
+        self._poisoned = max(0, value)
    
-        @health.setter
-        def health(self, new_health):
-            if new_health > 0 and new_health <= self._maxHealth:
-                self._health = new_health
-            elif new_health > self._maxHealth:
-                self._health = self._maxHealth
-            else:
-                self._health = 0
+    @property
+    def burned(self):
+        return self._burned
 
-        @property
-        def damage(self):
-            return self._damage
+    @burned.setter
+    def burned(self, value):
+        self._burned = max(0, value)
 
-        @damage.setter
-        def damage(self, new_damage):
-            if new_damage > 0:
-                self._health = new_damage
-            else:
-                self._health = 0
+    @health.setter
+    def health(self, new_health):
+        if new_health > 0 and new_health <= self._maxHealth:
+            self._health = new_health
+        elif new_health > self._maxHealth:
+            self._health = self._maxHealth
+        else:
+            self._health = 0
 
+    @property
+    def damage(self):
+        return self._damage
+
+    @damage.setter
+    def damage(self, new_damage):
+        if new_damage > 0:
+            self._health = new_damage
+        else:
+            self._health = 0
+    
     def take_damage(self, damage):
         actual_damage = damage
         if self._shield > 0:
@@ -271,7 +330,7 @@ class Entiti(ABC):
                 actual_damage -= self._shield
                 self._shield = 0
         self.health = self.health - actual_damage
-
+    
     def heal(self, amount):
         self._health = min(self._maxHealth, self._health + amount)
 
@@ -282,16 +341,16 @@ class Entiti(ABC):
     def update():
         pass
 
-class Character(Entiti):
+class Character(Alive):
    
 
     def update(self):
-        if self._poisoned > 0:
+        if self.poisoned > 0:
             self.take_damage(4)
-            self._poisoned -= 1
-        if self._burned > 0:
+            self.poisoned = self.poisoned - 1
+        if self.burned > 0:
             self.take_damage(3)
-            self._burned -= 1
+            self.burned = self.burned - 1
 
     def end_turn(self):
         self.update()
@@ -312,17 +371,15 @@ class Assasin(Character):
     def __init__(self, name, health, damage, abilities = []):
         super().__init__(name, health, damage, abilities)
 
-class Entity(Entiti):
-    
-
+class Entity(Alive):
     
     def update(self):
-        if self._poisoned > 0:
+        if self.poisoned > 0:
             self.take_damage(4)
-            self._poisoned -= 1
-        if self._burned > 0:
+            self.poisoned = self.poisoned - 1
+        if self.burned > 0:
             self.take_damage(3)
-            self._burned -= 1
+            self.burned = self.burned - 1
     
     
     
@@ -346,129 +403,130 @@ class Combat:
             else:
                 return target
 
-    
     def player_turn(self):
         move = True
         while move:
             print("\nВыберите действие:")
-            print("   1. Выбрать цель")
-            print("   2. Атаковать")
-            print("   3. Использовать карту")
-            while True:
-                try:
-                    action = int(input("Ваш выбор: "))
-                    break
-                except Exception:
-                    print("Пожалуйста, введите число")
-                
-            if action == 1:
-                print("\nДоступные цели:")
-                for i in range(0, len(self._enemies)):
-                    print(f"   {i + 1}. {self._enemies[i]._name} |  {self._enemies[i]._health}/{self._enemies[i]._maxHealth}")
-                
-                while True:
-                    try:
-                        target = int(input("Выберите цель: "))
-                        if target <= len(self._enemies):
-                            self._target = target - 1
-                            print(f"Цель выбрана: {self._enemies[self._target]._name}")
-                            break
-                        else:
-                            print(f"Введите число от 1 до {len(self._enemies)}")
-                            continue
-                    except Exception:
-                        print("Пожалуйста, введите число")
-                    
-                    
-                    
-            # ['fireball', 'heal', 'shield', 'lightning', 'poison']
-            elif action == 2:
-                if self._card  != None:
-                    ability = self._player._abilities[self._card]
-                    print(f"\nИспользована способность: {ability._name}!")
-                    if ability._damage > 0:
-                        print(f"Нанесено доп урона: {ability._damage}")
-                    if ability._healing > 0:
-                        print(f"Получено лечения: {ability._healing}")
-                    if ability._shield > 0:
-                        print(f"Добавлено щита: {ability._shield}")
-                    if ability._name in ['fireball', 'heal', 'shield', 'poison']:
-                        self._enemies[self._target].take_damage(self._player.damage + ability._damage)
-                    else:
-                        for i in range(0, len(self._enemies)):
-                            self._enemies[self._target].take_damage(ability._damage)
-                    self._enemies[self._target]._poisoned += (ability._poison)
-                    self._enemies[self._target]._burned += (ability._burne)
-                    if self._player._abilities[self._card]._splash == 'close':
-                        if len(self._enemies) > self._target + 1:
-                            self._enemies[self._target + 1]._burned += (ability._burne)
-                            self._enemies[self._target + 1]._poisoned += (ability._poison)
-                        if (self._target - 1) != -1:
-                            self._enemies[self._target - 1]._burned += (ability._burne)
-                            self._enemies[self._target - 1]._poisoned += (ability._poison)
-                    self._player._shield += ability._shield
-                    self._player.heal(ability._healing)
-                    ability._current_cooldown = ability._cooldown
-                else:
-                    self._enemies[self._target].take_damage(self._player.damage)
-                self._card = None
-                self._player.end_turn()
-                for id in range(len(self._enemies) - 1, -1, -1):
-                    if self._enemies[id].health <= 0:
-                        print(f"{self._enemies[id]._name} defeated!")
-                        self._enemies.pop(id)
-                        self._target = 0
-                break
-                
-
-            elif action == 3:
-                print("\nВАШИ КАРТЫ:")
-                AbilityCards.display_ability_hand(self._player._abilities)
-                print("\nПерезарядка:")
-                for i in range(0, len(self._player._abilities)):
-                    cd_status = "Готово" if self._player._abilities[i]._current_cooldown == 0 else f" {self._player._abilities[i]._current_cooldown} ход(ов)"
-                    print(f"   {i+1}. {cd_status}")
-                if len(self._player._abilities) > 0:
-                    while True:
-                        try:
-                            num_card = int(input("Выберите номер карты: "))
-                            if num_card <= len(self._player._abilities):
-                                if self._player._abilities[num_card - 1].is_ready():
-                                    self._card = num_card - 1
-                                    print(f"Карта '{self._player._abilities[self._card]._name}' выбрана!")
-                                    break   
-                                else:
-                                    print(f"Карта на перезарядке! Осталось: {self._player._abilities[num_card - 1]._current_cooldown} ход(ов)")
-                                    break
-                            else:
-                                print(f"Введите число от 1 до {len(self._player._abilities)}")
-                            
-                        except Exception:
-                            print("Пожалуйста, введите число")
-                    
-                            
-                    
-                    
-            else:
-                print("not correct")
+            print(" 1. Выбрать цель")
+            print(" 2. Атаковать")
+            print(" 3. Использовать карту")
+            try:
+                action = int(input("Ваш выбор: "))
+            except Exception:
+                print("Пожалуйста, введите число")
                 continue
 
+            if action == 1:
+                self.choose_target()
+            elif action == 2:
+                self.attack()
+                break
+            elif action == 3:
+                self.use_ability()
+            else:
+                print("Некорректный выбор, попробуйте снова.")
 
+    def choose_target(self):
+        print("\nДоступные цели:")
+        for i in range(0, len(self._enemies)):
+            print(f"   {i + 1}. {self._enemies[i].name} |  {self._enemies[i].health}/{self._enemies[i].maxHealth}")
+                
+        while True:
+            try:
+                target = int(input("Выберите цель: "))
+                if target <= len(self._enemies):
+                    self._target = target - 1
+                    print(f"Цель выбрана: {self._enemies[self._target].name}")
+                    break
+                else:
+                    print(f"Введите число от 1 до {len(self._enemies)}")
+                    continue
+            except Exception:
+                print("Пожалуйста, введите число")
+                    
+                    
+                    
+    def attack(self):
+        if self._card  != None:
+            ability = self._player._abilities[self._card]
+            print(f"\nИспользована способность: {ability.name}!")
+            if ability.damage > 0:
+                print(f"Нанесено доп урона: {ability.damage}")
+            if ability.healing > 0:
+                print(f"Получено лечения: {ability.healing}")
+            if ability.shield > 0:
+                print(f"Добавлено щита: {ability.shield}")
+            if ability.name in ['fireball', 'heal', 'shield', 'poison']:
+                self._enemies[self._target].take_damage(self._player.damage + ability.damage)
+            else:
+                for i in range(0, len(self._enemies)):
+                    self._enemies[self._target].take_damage(ability.damage)
+            self._enemies[self._target].poisoned += (ability.poison)
+            self._enemies[self._target].burned += (ability.burne)
+            if self._player._abilities[self._card].splash == 'close':
+                if len(self._enemies) > self._target + 1:
+                    self._enemies[self._target + 1].burned += (ability.burne)
+                    self._enemies[self._target + 1].poisoned += (ability.poison)
+                if (self._target - 1) != -1:
+                    self._enemies[self._target - 1].burned += (ability.burne)
+                    self._enemies[self._target - 1].poisoned += (ability.poison)
+            self._player.shield += ability.shield
+            self._player.heal(ability.healing)
+            ability._current_cooldown = ability._cooldown
+        else:
+            self._enemies[self._target].take_damage(self._player.damage)
+        self._card = None
+        self._player.end_turn()
+        for id in range(len(self._enemies) - 1, -1, -1):
+            if self._enemies[id].health <= 0:
+                print(f"{self._enemies[id].name} defeated!")
+                self._enemies.pop(id)
+                self._target = 0
+        print()
+        
+        
+                
+    def use_ability(self):
+        print("\nВАШИ КАРТЫ:")
+        AbilityCards.display_ability_hand(self._player._abilities)
+        print("\nПерезарядка:")
+        for i in range(0, len(self._player._abilities)):
+            cd_status = "Готово" if self._player._abilities[i]._current_cooldown == 0 else f" {self._player._abilities[i]._current_cooldown} ход(ов)"
+            print(f"   {i+1}. {cd_status}")
+        if len(self._player._abilities) > 0:
+            while True:
+                try:
+                    num_card = int(input("Выберите номер карты: "))
+                    if num_card <= len(self._player._abilities):
+                        if self._player._abilities[num_card - 1].is_ready():
+                            self._card = num_card - 1
+                            print(f"Карта '{self._player._abilities[self._card].name}' выбрана!")
+                            break   
+                        else:
+                            print(f"Карта на перезарядке! Осталось: {self._player._abilities[num_card - 1]._current_cooldown} ход(ов)")
+                            break
+                    else:
+                        print(f"Введите число от 1 до {len(self._player._abilities)}")
+                            
+                except Exception:
+                    print("Пожалуйста, введите число")
+                    
+                  
 
     def show_state(self):
-        print(f"Player: {self._player._name} | HP: {self._player.health}/{self._player._maxHealth} | Shield: {getattr(self._player, '_shield', 0)}")
+        print(f"Player: {self._player.name} | HP: {self._player.health}/{self._player.maxHealth} | Shield: {getattr(self._player, '_shield', 0)}")
         print("Enemies:")
         for i, enemy in enumerate(self._enemies):
             status_effects = []
             if getattr(enemy, '_poisoned', 0) > 0:
-                status_effects.append(f"Poisoned({enemy._poisoned})")
+                status_effects.append(f"Poisoned({enemy.poisoned})")
             if getattr(enemy, '_burned', 0) > 0:
-                status_effects.append(f"Burned({enemy._burned})")
+                status_effects.append(f"Burned({enemy.burned})")
             if getattr(enemy, '_shield', 0) > 0:
-                status_effects.append(f"Shield({enemy._shield})")
+                status_effects.append(f"Shield({enemy.shield})")
         
             status_str = " | " + ", ".join(status_effects) if status_effects else ""
-            print(f"  {i+1}. {enemy._name} | HP: {enemy.health}/{enemy._maxHealth}{status_str}")
+            print(f"  {i+1}. {enemy.name} | HP: {enemy.health}/{enemy.maxHealth}{status_str}")
 
 
     def enemy_turn(self):
@@ -509,6 +567,7 @@ class Game():
                 fight.get_combat_result()
                 break
             fight.show_state()
+            
            
        
     
