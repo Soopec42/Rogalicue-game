@@ -266,7 +266,7 @@ class Alive(ABC):
 
     @property
     def skilldmg(self):
-        return self._abilitydmg
+        return self._skilldmg
 
     @skilldmg.setter
     def skilldmg(self, new_dmg):
@@ -381,9 +381,9 @@ class Warrior(Character):
 
     def passive(self, card):
         if card == None:
-            skilldmg = 5
+            self.skilldmg = 5
         else:
-            skilldmg = 0
+            self.skilldmg = 0
 
     def passiveonce(self):
         pass
@@ -567,18 +567,21 @@ class Combat:
         self._player.passive(self._card)
         if self._card  != None:
             ability = self._player._abilities[self._card]
+            r = self._player.damage + ability.damage + self._player.skilldmg + random.randint(-2, 2)
             print(f"\nИспользована способность: {ability.name}!")
-            print(f"Нанесено урона: {ability.damage + self._player.damage}")
+            print(f"Нанесено урона: {r}")
             if ability.healing > 0:
                 print(f"Получено лечения: {ability.healing}")
             if ability.shield > 0:
                 print(f"Добавлено щита: {ability.shield}")
             time.sleep(3)
             if ability.name in ['fireball', 'heal', 'shield', 'poison']:
-                self._enemies[self._target].take_damage(self._player.damage + ability.damage + self._player.skilldmg + random.randint(-2, 2))
+
+                self._enemies[self._target].take_damage(r)
             else:
                 for i in range(0, len(self._enemies)):
-                    self._enemies[self._target].take_damage(ability.damage)
+                    b = ability.damage + random.randint(-2, 2)
+                    self._enemies[i].take_damage(b)
             self._enemies[self._target].poisoned += (ability.poison)
             self._enemies[self._target].burned += (ability.burne)
             if self._player._abilities[self._card].splash == 'close':
@@ -592,7 +595,10 @@ class Combat:
             self._player.heal(ability.healing)
             ability._current_cooldown = ability._cooldown
         else:
-            self._enemies[self._target].take_damage(self._player.damage)
+            r = self._player.damage + random.randint(-2, 2) + self._player.skilldmg
+            print(f"Нанесено урона: {r}")
+            time.sleep(3)
+            self._enemies[self._target].take_damage(r)
         self._card = None
         self._player.end_turn()
         for id in range(len(self._enemies) - 1, -1, -1):
