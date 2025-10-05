@@ -1,4 +1,5 @@
 ﻿from abc import ABC, abstractmethod
+from hmac import new
 import string
 from enum import Enum
 import random
@@ -54,6 +55,12 @@ class Ability:
     def cooldown(self):
         return self._cooldown
 
+    @cooldown.setter
+    def cooldown(self, newcd):
+        if newcd >= 0:
+            self._cooldown = newcd
+        else:
+            self._cooldown = 0
     @property
     def current_cooldown(self):
         return self._current_cooldown
@@ -255,7 +262,7 @@ class AbilityCards:
 
 class Alive(ABC):
 
-    def __init__(self, name, health = 100, damage = 10, abilities = [], poisoned = 0, burned = 0, shield = 0):
+    def __init__(self, name, health = 100, damage = 10, abilities = [], poisoned = 0, burned = 0, shield = 0, maxcard = 0):
         self._name = name
         self._health = health
         self._damage = damage
@@ -264,10 +271,20 @@ class Alive(ABC):
         self._poisoned = poisoned
         self._burned = burned
         self._shield = shield
+        self._skilldmg = 0
+        self._maxcard = maxcard
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def skilldmg(self):
+        return self._abilitydmg
+
+    @skilldmg.setter
+    def skilldmg(self, new_dmg):
+        self._skilldmg = new_dmg
 
     @property
     def health(self):
@@ -343,6 +360,8 @@ class Alive(ABC):
     def update():
         pass
 
+
+
 class Character(Alive):
    
 
@@ -358,20 +377,55 @@ class Character(Alive):
         self.update()
         for ability in self._abilities:
             ability.update()
+    @abstractmethod
+    def passive(self):
+        pass
 
+    @abstractmethod
+    def passiveonce(self):
+        pass
+
+    def info(self):
+        print(f"{self.name} | {self.maxHealth} HP | {self.damage} DMG")
 
 
 class Warrior(Character):
-    def __init__(self, name, health, damage, abilities = []):
+    def __init__(self, name, health, damage, abilities = [], maxcard = 2):
         super().__init__(name, health, damage, abilities)
+
+    def passive(self, card):
+        if card == None:
+            skilldmg = 5
+        else:
+            skilldmg = 0
+
+    def passiveonce(self):
+        pass
     
 class Magician(Character):
-    def __init__(self, name, health, damage, abilities = []):
+    def __init__(self, name, health, damage, abilities = [], maxcard = 3):
         super().__init__(name, health, damage, abilities)   
+        
+    def passive(self, card):
+        pass
+
+    def passiveonce(self):
+        pass
+        
 
 class Assasin(Character):
-    def __init__(self, name, health, damage, abilities = []):
+    def __init__(self, name, health, damage, abilities = [], maxcard = 2):
         super().__init__(name, health, damage, abilities)
+        for ability in self._abilities:
+            ability.cooldown = ability.cooldown - 1
+        
+    def passive(self, card):
+        pass
+
+    def passiveonce(self):
+        pass
+
+#при добавлении карт не забыть их кд уменьшать
 
 class Entity(Alive):
     
@@ -384,9 +438,6 @@ class Entity(Alive):
             self.burned = self.burned - 1
     
     
-    
-    
-
 class Combat:
     def __init__(self, player, enemies):
         self._player = player
@@ -436,7 +487,7 @@ class Combat:
     def choose_target(self):
         print("\nДоступные цели:")
         for i in range(0, len(self._enemies)):
-            print(f"   {i + 1}. {self._enemies[i].name} |  {self._enemies[i].health}/{self._enemies[i].maxHealth}")
+            print(f"   {i + 1}. {self._enemies[i].name} | HP: {self._enemies[i].health}/{self._enemies[i].maxHealth} | DMG: {self._enemies[i].damage}")
                 
         while True:
             try:
@@ -454,6 +505,7 @@ class Combat:
                     
                     
     def attack(self):
+        self._player.passive(self._card)
         if self._card  != None:
             ability = self._player._abilities[self._card]
             print(f"\nИспользована способность: {ability.name}!")
@@ -464,7 +516,7 @@ class Combat:
                 print(f"Добавлено щита: {ability.shield}")
             time.sleep(3)
             if ability.name in ['fireball', 'heal', 'shield', 'poison']:
-                self._enemies[self._target].take_damage(self._player.damage + ability.damage)
+                self._enemies[self._target].take_damage(self._player.damage + ability.damage + self._player.skilldmg + random.randint(-2, 2))
             else:
                 for i in range(0, len(self._enemies)):
                     self._enemies[self._target].take_damage(ability.damage)
@@ -539,7 +591,7 @@ class Combat:
 
     def enemy_turn(self):
         for enemy in self._enemies:
-            self._player.take_damage(enemy.damage)
+            self._player.take_damage(enemy.damage + random.randint(-2, 2))
             enemy.update()
         
         
@@ -562,7 +614,37 @@ class Combat:
             print("\nПОБЕДА! Все противники повержены!")
 
 class Game():
+    def __init__(self):
+        #переписать когда появится список всех классов по необходимости
+        self.kolkl = 3
+        self._player = None
+        self._choise = None
+        
 
+    def choosing_character(self):
+        print("Выберите класс вашего персонажа: ")
+        print("Воин    | 100 HP | 15 DMG - поссивная способность: без заклинаний наносит на 5 урона больше")
+        print("Маг     |  90 HP | 15 DMG - пассивная способность: может выбрать на 1 карту способности больше")
+        print("Ассасин | 100 HP | 17 DMG - пассивная способность: все каты откатываются на 1 ход быстрее")
+        
+        while True:
+            try:
+                choise = int(input("Введите номер: "))
+                if choise <= self.kolkl:
+                    self._choise = choise - 1
+                    break
+                else:
+                    print(f"Введите число от 1 до {len(self._character_options)}")
+                    continue
+            except ValueError:
+                print("Пожалуйста, введите число")
+        if self._choise == 0:
+            self._player = Warrior("Воин", 100, 15)
+        elif self._choise == 1:
+            self._player = Magician("Маг", 90, 15)
+        else:
+            self._player = Assasin("Ассасин", 100, 17)
+        print(f"Выбран класс {self._player.name} ")
 
     def start_fight(self, fight):
         while not fight.is_combat_over():
@@ -575,8 +657,7 @@ class Game():
                 fight.get_combat_result()
                 break
             
-           
-       
+    
     
     def create_enemy(self, char_type, name):
         enemy = self.factory.create_character(char_type, name)
@@ -586,19 +667,15 @@ class Game():
 
 
 
-    
+
 
 def main():
-    
-    fireball1 = CardFactory.create_card('fireball')
-    fireball2 = CardFactory.create_card('fireball')
-    heal1 = CardFactory.create_card('heal')
+    st = Game()
+    st.choosing_character()
     troll = Entity("troll", 50, 10)
     knight =  Entity("knight", 50, 10)
     enemies = [troll, knight]
-    player = Warrior("warrior1", 100, 15, abilities = [fireball1, fireball2, heal1])
-    fight = Combat(player, enemies)
-    st = Game()
+    fight = Combat(st._player, enemies)
     st.start_fight(fight)
 
 
