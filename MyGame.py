@@ -422,75 +422,6 @@ class Entity(Alive):
             self.take_damage(3)
             self.burned = self.burned - 1
     
-"""
-class Inventory:
-    def __init__(self, capacity=20):
-        self._capacity = capacity
-        self._items = {}  # {item_id: {item: object, count: int}}
-        self._equipped = {}  # {slot: item}
-    
-    def add_item(self, item, count=1):
-        if len(self._items) >= self._capacity:
-            return False
-        
-        item_id = item.id
-        if item_id in self._items:
-            self._items[item_id]['count'] += count
-        else:
-            self._items[item_id] = {'item': item, 'count': count}
-        return True
-    
-    def remove_item(self, item_id, count=1):
-        if item_id in self._items:
-            self._items[item_id]['count'] -= count
-            if self._items[item_id]['count'] <= 0:
-                del self._items[item_id]
-            return True
-        return False
-    
-    def equip_item(self, item_id, slot):
-        if item_id in self._items:
-            self._equipped[slot] = self._items[item_id]['item']
-            return True
-        return False
-    
-    def get_items(self):
-        return [(data['item'], data['count']) for data in self._items.values()]
-"""
-class Spellbook:
-    @staticmethod
-    def learn_spell(abilities, spell):
-        abilities.append(spell)
-    
-    @staticmethod
-    def remove_from_deck(abilities, spell_name):
-        if spell_name in abilities:
-            abilities.remove(spell_name)
-            
-"""
-class Item:
-    def __init__(self, item_id, name, item_type, value, description=""): #value - цена descr.. - описание для игрока
-        self.id = item_id
-        self.name = name
-        self.type = item_type  # 'weapon', 'armor', 'potion', 'scroll'
-        self.value = value
-        self.description = description
-    
-    def use(self, target):
-        
-        pass
-"""
-"""
-class Potion(Item):
-    def __init__(self, item_id, name, healing=0, mana=0):
-        super().__init__(item_id, name, 'potion', 10)
-        self.healing = healing
-        self.mana = mana
-    
-    def use(self, target):
-        if self.healing > 0:
-            target.heal(self.healing)
-"""
 
 
 
@@ -611,7 +542,7 @@ class Combat:
         
                 
     def use_ability(self):
-        print("\nВАШИ КАРТЫ:")
+        print("\nВАШИ КАРТЫ (МОДИФИКАТОРЫ АТАК):")
         AbilityCards.display_ability_hand(self._player._abilities)
         print("\nПерезарядка:")
         for i in range(0, len(self._player._abilities)):
